@@ -377,6 +377,21 @@ export function createTemplateString(
   );
 }
 
+export function createImport(
+  moduleSpecifier: ts.Expression,
+  opts: {
+    nameBindings?: ts.NamespaceImport | ts.NamedImports;
+    defaultName?: ts.Identifier;
+  }
+): ts.ImportDeclaration {
+  return ts.createImportDeclaration(
+    [],
+    [],
+    ts.createImportClause(opts.defaultName, opts.nameBindings, undefined),
+    moduleSpecifier
+  );
+}
+
 export function findNode<T extends ts.Node>(
   nodes: ts.NodeArray<ts.Node>,
   kind: T extends { kind: infer K } ? K : never,

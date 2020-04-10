@@ -178,10 +178,15 @@ function supportDeepObjects(params: OpenAPIV3.ParameterObject[]) {
   return res;
 }
 
+export type GeneratorOptions = { addNodeFetchImports?: boolean };
+
 /**
  * Main entry point that generates TypeScript code from a given API spec.
  */
-export default function generateApi(spec: OpenAPIV3.Document) {
+export default function generateApi(
+  spec: OpenAPIV3.Document,
+  opts: GeneratorOptions = {}
+) {
   const aliases: ts.TypeAliasDeclaration[] = [];
 
   function resolve<T>(obj: T | OpenAPIV3.ReferenceObject): T {
@@ -697,10 +702,30 @@ export default function generateApi(spec: OpenAPIV3.Document) {
     });
   });
 
-  stub.statements = cg.appendNodes(
-    stub.statements,
-    ...[...aliases, ...functions]
-  );
+  const nodeFetchImports = opts.addNodeFetchImports
+    ? [
+        cg.createImport(ts.createStringLiteral("node-fetch"), {
+          nameBindings: ts.createNamedImports([
+            ts.createImportSpecifier(
+              undefined,
+              ts.createIdentifier("RequestInit")
+            ),
+            ts.createImportSpecifier(undefined, ts.createIdentifier("Blob"))
+          ]),
+          defaultName: ts.createIdentifier("fetch")
+        }),
+        cg.createImport(ts.createStringLiteral("form-data"), {
+          defaultName: ts.createIdentifier("FormData")
+        })
+      ]
+    : [];
+
+  stub.statements = ts.createNodeArray([
+    ...nodeFetchImports,
+    ...stub.statements,
+    ...aliases,
+    ...functions
+  ]);
 
   return stub;
 }
