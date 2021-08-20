@@ -2,6 +2,27 @@
 
 Generate TypeScript clients to tap into OpenAPI servers.
 
+## Why the fork?
+
+The original library does not urlencode path parameters, and we did a fix in branch encode-params (https://github.com/cellular/oazapfts/pull/103).
+Until they merge it, this repo serves as a way to publish internal versions.
+
+### To update repo and publish a version:
+
+1. Bump the `version` field in `package.json`
+2. Setup npm credentials to publish
+3. Run
+
+```sh
+git remote add cellular https://github.com/cellular/oazapfts
+git fetch --all --force --tags
+git checkout encode-params
+git rebase cellular/master
+npm install
+npm prepare
+npm publish --access public
+```
+
 ## Features
 
 - **AST-based**:
